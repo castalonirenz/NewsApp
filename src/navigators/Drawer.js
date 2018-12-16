@@ -14,7 +14,7 @@ import {
     TouchableOpacity
   } from "react-native";
 import PHNewsScreen from "../screens/PHNewsScreen";
-import { HomeContainer } from "./Stack";
+import { HomeContainer, AboutMeContainer } from "./Stack";
   const CustomDrawerComponent = props => (
     <SafeAreaView style={{ flex: 1 }}>
       <ImageBackground
@@ -45,6 +45,9 @@ import { HomeContainer } from "./Stack";
       'Home': {
         screen: HomeContainer
       },
+      "About Me":{
+        screen: AboutMeContainer
+      }
     },
     {
       contentComponent: CustomDrawerComponent,

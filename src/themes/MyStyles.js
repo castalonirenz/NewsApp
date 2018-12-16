@@ -9,6 +9,7 @@ export const MyStyle = StyleSheet.create({
     headerStyle:{
         textAlign:"center",
         width:"80%",
+        color:"#000"
     },
     titleStyle:{
         width:"100%",
@@ -28,6 +29,13 @@ export const MyStyle = StyleSheet.create({
     contentPlaceHolder:{
         marginTop: 20,
         width:"100%"
+    },
+    newsTitle:{
+        fontWeight:"bold",
+        color:"#000"
+    },
+    newsContent:{
+        color:"#000"
     }
 
 

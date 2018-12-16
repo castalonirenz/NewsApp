@@ -1,9 +1,10 @@
 import {createStore, combineReducers, applyMiddleware, compose} from 'redux'
 import thunk from 'redux-thunk';
 import newsDataReducer from "./reducer/newsDataReducer";
-
+import isLoading from './reducer/activityIndicator'
 const combineReducer = combineReducers({
-    getNews: newsDataReducer
+    getNews: newsDataReducer,
+    activityIndicator: isLoading
 })
 
 let composeEnhancers = compose;
