@@ -21,7 +21,7 @@ class PHNewsScreen extends Component {
     }
     this.props.onLoadNews();
   }
- 
+
 
   static navigationOptions = ({ navigation }) => ({
     title: "News",
@@ -74,10 +74,12 @@ class PHNewsScreen extends Component {
           <Input
             onChangeText={(Text) => this.setState({ Search: Text })}
             value={this.state.Search}
-            placeholder="Search News"
+            placeholder="Search Anything"
           >
           </Input>
-          <TouchableOpacity onPress={this._onSearch}>
+          <TouchableOpacity
+            style={{ marginLeft: 10 }}
+            onPress={this._onSearch}>
             <Icon name="md-search" size={40} color="#313235" />
           </TouchableOpacity>
         </View>
@@ -107,18 +109,23 @@ class PHNewsScreen extends Component {
               <View style={MyStyle.contentPlaceHolder}>
                 <Text style={[MyStyle.newsContent, { fontSize: newsContent }]}>{items.content}</Text>
               </View>
-              <View style={{ flexDirection: "row" }}>
+              <View>
+                <View style={{flexDirection:"row", alignItems:"center"}}>
                 <TouchableOpacity
                   onPress={this._onShare.bind(this, items.title, items.content, items.urlToImage, items.url)}
                   style={styles.iconHolder}>
                   <Icon name="md-share" size={40} color="#43bcff" />
                 </TouchableOpacity>
-
+                <Text style={[MyStyle.newsContent, { fontSize: newsContent, color:"#43bcff" }]}>Share this Article</Text>
+                </View>
+                <View style={{flexDirection:"row", alignItems:"center"}}>
                 <TouchableOpacity
                   onPress={this._openLink.bind(this, items.url)}
                   style={styles.iconHolder}>
                   <Icon name="md-book" size={40} color="#24978d" />
                 </TouchableOpacity>
+                <Text style={[MyStyle.newsContent, { fontSize: newsContent, color:"#24978d" }]}>Open this Article</Text>
+                </View>
               </View>
             </View>
           ))}
@@ -136,9 +143,14 @@ const styles = StyleSheet.create({
   },
   searchHolder: {
     marginTop: 20,
+    width: "70%",
+    height: 50,
     flexDirection: "row",
     alignItems: 'center',
-
+    justifyContent: 'center',
+    backgroundColor: "#fff",
+    borderRadius: 50,
+    borderWidth: 1,
   }
 })
 

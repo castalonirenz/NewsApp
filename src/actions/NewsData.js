@@ -26,6 +26,7 @@ export const searchNews = (searchInput) => {
         }
       else{
           alert('Unable to find this article')
+          dispatch(uiStopLoading());
       }
     }
 
