@@ -1,15 +1,18 @@
 import React, { Component } from 'react';
-import { View, Text,NetInfo, TouchableOpacity, StyleSheet, ScrollView, Dimensions, Image, Linking, ActivityIndicator, Share } from 'react-native';
+import { View, Text, NetInfo, TouchableOpacity, StyleSheet, ScrollView, Dimensions, Image, Linking, ActivityIndicator, Share } from 'react-native';
 import { MyStyle } from "../themes/MyStyles";
 import Icon from "react-native-vector-icons/Ionicons";
 import { connect } from "react-redux";
-import { getNews } from "../actions/NewsData";
+import { getNews, searchNews } from "../actions/NewsData";
 import { FontStyle } from "../themes/fonts";
+import { Input } from "../components/textInput";
 let newsTitle = FontStyle.NewsTitle.BigFont
 let newsContent = FontStyle.NewsContent.BigFont
+let SearchValue
 class PHNewsScreen extends Component {
-  state ={
-    isConnected: true
+  state = {
+    isConnected: true,
+    Search: "",
   }
   componentDidMount() {
     if (Dimensions.get('screen').width <= 360) {
@@ -18,7 +21,8 @@ class PHNewsScreen extends Component {
     }
     this.props.onLoadNews();
   }
-  
+ 
+
   static navigationOptions = ({ navigation }) => ({
     title: "News",
     headerTitleStyle: MyStyle.headerStyle,
@@ -54,10 +58,30 @@ class PHNewsScreen extends Component {
       })
   }
 
+  _onSearch = () => {
+    this.props.onSearchNews(this.state.Search);
+  }
+
   render() {
     let loading;
+    let Search;
     if (this.props.isLoading) {
       loading = <ActivityIndicator size={50} color="gray" />;
+    }
+    else if (!this.props.isLoading) {
+      Search =
+        <View style={styles.searchHolder}>
+          <Input
+            onChangeText={(Text) => this.setState({ Search: Text })}
+            value={this.state.Search}
+            placeholder="Search News"
+          >
+          </Input>
+          <TouchableOpacity onPress={this._onSearch}>
+            <Icon name="md-search" size={40} color="#313235" />
+          </TouchableOpacity>
+        </View>
+
     }
     return (
       <ScrollView
@@ -65,8 +89,10 @@ class PHNewsScreen extends Component {
         contentContainerStyle={{ flexGrow: 1 }}>
         <View style={MyStyle.Container}>
           {console.log('pumasok sa return')}
+          {Search}
           {loading}
           {this.props.GetNews.map((items, key) => (
+
             <View
               key={key} style={MyStyle.newsPlaceHolder}>
               <View style={MyStyle.titleStyle}>
@@ -107,6 +133,12 @@ const styles = StyleSheet.create({
   iconHolder: {
     marginTop: 10,
     width: 40
+  },
+  searchHolder: {
+    marginTop: 20,
+    flexDirection: "row",
+    alignItems: 'center',
+
   }
 })
 
@@ -118,7 +150,8 @@ const mapStateToProps = state => {
 }
 const mapDispatchToProps = dispatch => {
   return {
-    onLoadNews: () => dispatch(getNews())
+    onLoadNews: () => dispatch(getNews()),
+    onSearchNews: (searchData) => dispatch(searchNews(searchData))
   }
 }
 

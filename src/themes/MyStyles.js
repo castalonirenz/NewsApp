@@ -5,6 +5,7 @@ export const MyStyle = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+        width:"100%"
     },
     headerStyle:{
         textAlign:"center",

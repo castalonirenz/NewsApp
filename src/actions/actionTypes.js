@@ -1,3 +1,4 @@
 export const SET_NEWS_DATA = "SET_NEWS_DATA"
 export const UI_START_LOADING = "UI_START_LOADING"
 export const UI_STOP_LOADING = "UI_STOP_LOADING"
+export const SEARCH_NEWS = "SEARCH_NEWS"
