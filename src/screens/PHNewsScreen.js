@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, NetInfo, TouchableOpacity, StyleSheet, ScrollView, Dimensions, Image, Linking, ActivityIndicator, Share } from 'react-native';
+import { View, Text, RefreshControl, TouchableOpacity, StyleSheet, ScrollView, Dimensions, Image, Linking, ActivityIndicator, Share } from 'react-native';
 import { MyStyle } from "../themes/MyStyles";
 import Icon from "react-native-vector-icons/Ionicons";
 import { connect } from "react-redux";
@@ -9,11 +9,12 @@ import { Input } from "../components/textInput";
 import { Header, Left, Right } from "native-base";
 let newsTitle = FontStyle.NewsTitle.BigFont
 let newsContent = FontStyle.NewsContent.BigFont
-let SearchValue
+import { HeaderStyle } from "../themes/HeaderStyle";
 class PHNewsScreen extends Component {
   state = {
     isConnected: true,
-    Search: "",
+    Search: null,
+    refreshing: false
   }
   componentDidMount() {
     if (Dimensions.get('screen').width <= 360) {
@@ -25,22 +26,6 @@ class PHNewsScreen extends Component {
   static navigationOptions = {
     header: null
   }
-
-  // static navigationOptions = ({ navigation }) => ({
-  //   title: "News",
-  //   headerTitleStyle: MyStyle.headerStyle,
-  //   headerLeft: (
-  //     <TouchableOpacity
-  //       onPress={() => navigation.toggleDrawer()}
-  //       style={{ paddingLeft: 20 }}>
-  //       <Icon
-  //         name="md-menu"
-  //         color={"#000"}
-  //         size={24}
-  //       />
-  //     </TouchableOpacity>
-  //   ),
-  // })
   _openLink = (val) => {
     Linking
       .openURL(val)
@@ -60,19 +45,39 @@ class PHNewsScreen extends Component {
         ]
       })
   }
-
+  _onRefresh = () => {
+    if(this.state.Search === null){
+      this.setState({refreshing: true});
+      this.props.onLoadNews()
+      this.setState({refreshing: false})
+    }
+    else if(this.state.Search !== null){
+      this.setState({refreshing: true});
+      this.props.onSearchNews(this.state.Search)
+      this.setState({refreshing: false})
+    }
+   
+  }
   _onSearch = () => {
     this.props.onSearchNews(this.state.Search);
   }
-
   render() {
     let loading;
-    let Search;
+    let SearchLoading;
     if (this.props.isLoading) {
-      loading = <ActivityIndicator size={50} color="gray" />;
+      loading = <ActivityIndicator size={30} color="gray" />;
     }
     else if (!this.props.isLoading) {
-      Search =
+      SearchLoading = 
+      <TouchableOpacity
+      style={{ marginLeft: 10 }}
+      onPress={this._onSearch}>
+      <Icon name="md-search" size={30} color="#313235"/>
+    </TouchableOpacity>
+    }
+    return (
+      <View style={{ flex: 1, width: "100%"}}>
+        <Header style={HeaderStyle.style}>
         <View style={{flexDirection:"row", width:"100%", justifyContent:"space-around", alignItems:"center"}}>
           <TouchableOpacity
             onPress={() => this.props.navigation.toggleDrawer()}>
@@ -89,11 +94,8 @@ class PHNewsScreen extends Component {
               placeholder="Search Anything"
             >
             </Input>
-            <TouchableOpacity
-              style={{ marginLeft: 10 }}
-              onPress={this._onSearch}>
-              <Icon name="md-search" size={30} color="#313235" />
-            </TouchableOpacity>
+           {SearchLoading}
+           {loading}
           </View>
           <TouchableOpacity
             onPress={() => alert('On Progess')}>
@@ -104,15 +106,14 @@ class PHNewsScreen extends Component {
             />
           </TouchableOpacity>
         </View>
-
-    }
-    return (
-      <View style={{ flex: 1, width: "100%"}}>
-        <Header style={{ alignItems: "center", justifyContent: "center", height: 70, backgroundColor:"#173F5F" }}>
-          {Search}
-          {loading}
         </Header>
         <ScrollView
+          refreshControl={
+            <RefreshControl
+            refreshing={this.state.refreshing}
+            onRefresh={this._onRefresh}
+          />
+          }
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ flexGrow: 1 }}>
           <View style={MyStyle.Container}>
