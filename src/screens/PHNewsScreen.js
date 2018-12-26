@@ -6,6 +6,7 @@ import { connect } from "react-redux";
 import { getNews, searchNews } from "../actions/NewsData";
 import { FontStyle } from "../themes/fonts";
 import { Input } from "../components/textInput";
+import { Header, Left, Right } from "native-base";
 let newsTitle = FontStyle.NewsTitle.BigFont
 let newsContent = FontStyle.NewsContent.BigFont
 let SearchValue
@@ -21,23 +22,25 @@ class PHNewsScreen extends Component {
     }
     this.props.onLoadNews();
   }
+  static navigationOptions = {
+    header: null
+  }
 
-
-  static navigationOptions = ({ navigation }) => ({
-    title: "News",
-    headerTitleStyle: MyStyle.headerStyle,
-    headerLeft: (
-      <TouchableOpacity
-        onPress={() => navigation.toggleDrawer()}
-        style={{ paddingLeft: 20 }}>
-        <Icon
-          name="md-menu"
-          color={"#000"}
-          size={24}
-        />
-      </TouchableOpacity>
-    ),
-  })
+  // static navigationOptions = ({ navigation }) => ({
+  //   title: "News",
+  //   headerTitleStyle: MyStyle.headerStyle,
+  //   headerLeft: (
+  //     <TouchableOpacity
+  //       onPress={() => navigation.toggleDrawer()}
+  //       style={{ paddingLeft: 20 }}>
+  //       <Icon
+  //         name="md-menu"
+  //         color={"#000"}
+  //         size={24}
+  //       />
+  //     </TouchableOpacity>
+  //   ),
+  // })
   _openLink = (val) => {
     Linking
       .openURL(val)
@@ -70,68 +73,90 @@ class PHNewsScreen extends Component {
     }
     else if (!this.props.isLoading) {
       Search =
-        <View style={styles.searchHolder}>
-          <Input
-            onChangeText={(Text) => this.setState({ Search: Text })}
-            value={this.state.Search}
-            placeholder="Search Anything"
-          >
-          </Input>
+        <View style={{flexDirection:"row", width:"100%", justifyContent:"space-around", alignItems:"center"}}>
           <TouchableOpacity
-            style={{ marginLeft: 10 }}
-            onPress={this._onSearch}>
-            <Icon name="md-search" size={40} color="#313235" />
+            onPress={() => this.props.navigation.toggleDrawer()}>
+            <Icon
+              name="md-menu"
+              color={"#fff"}
+              size={30}
+            />
+          </TouchableOpacity>
+          <View style={styles.searchHolder}>
+            <Input
+              onChangeText={(Text) => this.setState({ Search: Text })}
+              value={this.state.Search}
+              placeholder="Search Anything"
+            >
+            </Input>
+            <TouchableOpacity
+              style={{ marginLeft: 10 }}
+              onPress={this._onSearch}>
+              <Icon name="md-search" size={30} color="#313235" />
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity
+            onPress={() => alert('On Progess')}>
+            <Icon
+              name="md-list"
+              color={"#fff"}
+              size={30}
+            />
           </TouchableOpacity>
         </View>
 
     }
     return (
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ flexGrow: 1 }}>
-        <View style={MyStyle.Container}>
-          {console.log('pumasok sa return')}
+      <View style={{ flex: 1, width: "100%"}}>
+        <Header style={{ alignItems: "center", justifyContent: "center", height: 70, backgroundColor:"#173F5F" }}>
           {Search}
           {loading}
-          {this.props.GetNews.map((items, key) => (
+        </Header>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ flexGrow: 1 }}>
+          <View style={MyStyle.Container}>
+            {console.log('pumasok sa return')}
+            {this.props.GetNews.map((items, key) => (
 
-            <View
-              key={key} style={MyStyle.newsPlaceHolder}>
-              <View style={MyStyle.titleStyle}>
-                <Text style={[MyStyle.newsTitle, { fontSize: newsTitle }]}>{items.title}</Text>
-              </View>
-              <View style={MyStyle.imagePlaceHolder}>
-                <Image
-                  resizeMode="contain"
-                  style={{ height: 200, width: "100%" }}
-                  source={{ uri: items.urlToImage }} />
-              </View>
-              <View style={MyStyle.contentPlaceHolder}>
-                <Text style={[MyStyle.newsContent, { fontSize: newsContent }]}>{items.content}</Text>
-              </View>
-              <View>
-                <View style={{flexDirection:"row", alignItems:"center"}}>
-                <TouchableOpacity
-                  onPress={this._onShare.bind(this, items.title, items.content, items.urlToImage, items.url)}
-                  style={styles.iconHolder}>
-                  <Icon name="md-share" size={40} color="#43bcff" />
-                </TouchableOpacity>
-                <Text style={[MyStyle.newsContent, { fontSize: newsContent, color:"#43bcff" }]}>Share this Article</Text>
+              <View
+                key={key} style={MyStyle.newsPlaceHolder}>
+                <View style={MyStyle.titleStyle}>
+                  <Text style={[MyStyle.newsTitle, { fontSize: newsTitle }]}>{items.title}</Text>
                 </View>
-                <View style={{flexDirection:"row", alignItems:"center"}}>
-                <TouchableOpacity
-                  onPress={this._openLink.bind(this, items.url)}
-                  style={styles.iconHolder}>
-                  <Icon name="md-book" size={40} color="#24978d" />
-                </TouchableOpacity>
-                <Text style={[MyStyle.newsContent, { fontSize: newsContent, color:"#24978d" }]}>Open this Article</Text>
+                <View style={MyStyle.imagePlaceHolder}>
+                  <Image
+                    resizeMode="contain"
+                    style={{ height: 200, width: "100%" }}
+                    source={{ uri: items.urlToImage }} />
+                </View>
+                <View style={MyStyle.contentPlaceHolder}>
+                  <Text style={[MyStyle.newsContent, { fontSize: newsContent }]}>{items.content}</Text>
+                </View>
+                <View>
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <TouchableOpacity
+                      onPress={this._onShare.bind(this, items.title, items.content, items.urlToImage, items.url)}
+                      style={styles.iconHolder}>
+                      <Icon name="md-share" size={40} color="#43bcff" />
+                    </TouchableOpacity>
+                    <Text style={[MyStyle.newsContent, { fontSize: newsContent, color: "#43bcff" }]}>Share this Article</Text>
+                  </View>
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <TouchableOpacity
+                      onPress={this._openLink.bind(this, items.url)}
+                      style={styles.iconHolder}>
+                      <Icon name="md-book" size={40} color="#24978d" />
+                    </TouchableOpacity>
+                    <Text style={[MyStyle.newsContent, { fontSize: newsContent, color: "#24978d" }]}>Open this Article</Text>
+                  </View>
                 </View>
               </View>
-            </View>
-          ))}
+            ))}
 
-        </View>
-      </ScrollView>
+          </View>
+        </ScrollView>
+      </View>
     );
   }
 }
@@ -142,15 +167,13 @@ const styles = StyleSheet.create({
     width: 40
   },
   searchHolder: {
-    marginTop: 20,
     width: "70%",
     height: 50,
     flexDirection: "row",
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: "#fff",
-    borderRadius: 50,
-    borderWidth: 1,
+
   }
 })
 
