@@ -6,6 +6,5 @@ export const InputStyle = StyleSheet.create({
         height: 40,
         backgroundColor:"#fff",
         textAlign:"center",
-        borderBottomWidth: 1,
     }
 })

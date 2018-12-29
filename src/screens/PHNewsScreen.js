@@ -1,5 +1,9 @@
 import React, { Component } from 'react';
-import { View, Text, RefreshControl, TouchableOpacity, StyleSheet, ScrollView, Dimensions, Image, Linking, ActivityIndicator, Share } from 'react-native';
+import {
+  View, Text, RefreshControl,
+  TouchableOpacity, StyleSheet, ScrollView,
+  Dimensions, Image, Linking, ActivityIndicator, Share, Animated
+} from 'react-native';
 import { MyStyle } from "../themes/MyStyles";
 import Icon from "react-native-vector-icons/Ionicons";
 import { connect } from "react-redux";
@@ -7,14 +11,21 @@ import { getNews, searchNews } from "../actions/NewsData";
 import { FontStyle } from "../themes/fonts";
 import { Input } from "../components/textInput";
 import { Header, Left, Right } from "native-base";
+import { ActionButtonStyles } from "../themes/ActionButton";
 let newsTitle = FontStyle.NewsTitle.BigFont
 let newsContent = FontStyle.NewsContent.BigFont
 import { HeaderStyle } from "../themes/HeaderStyle";
+import { ActionButton } from "../components/actionButton";
+let HEADER_MAX_HEIGHT = 50;// set the initial height
+let HEADER_MIN_HEIGHT = 0;// set the height on scroll
+let HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 class PHNewsScreen extends Component {
   state = {
     isConnected: true,
-    Search: null,
-    refreshing: false
+    Search: "",
+    refreshing: false,
+    scrollY: new Animated.Value(0),
+    scrolling: false,
   }
   componentDidMount() {
     if (Dimensions.get('screen').width <= 360) {
@@ -33,7 +44,8 @@ class PHNewsScreen extends Component {
 
   _onShare(title, content, image, url) {
     Share.share({
-      message: "Headline: " + title + " " + "Content: " + content + " " + "Image:" + image + " " + "Url: " + url,
+      message: "Headline: " + title + " " + "Content: " +
+        content + " " + "Image:" + image + " " + "Url: " + url,
       url: url,
       title: title
     }, {
@@ -46,17 +58,19 @@ class PHNewsScreen extends Component {
       })
   }
   _onRefresh = () => {
-    if(this.state.Search === null){
-      this.setState({refreshing: true});
+    if (this.state.Search === "") {
+      this.setState({ refreshing: true });
       this.props.onLoadNews()
-      this.setState({refreshing: false})
+      this.setState({ refreshing: false })
     }
-    else if(this.state.Search !== null){
-      this.setState({refreshing: true});
+    else if (this.state.Search !== "") {
+      this.setState({ refreshing: true });
       this.props.onSearchNews(this.state.Search)
-      this.setState({refreshing: false})
+      this.setState({ refreshing: false })
     }
-   
+  }
+  _goToTop = () => {
+    this.refs.ScrollView_Reference.scrollTo({ animated: true }, 0)
   }
   _onSearch = () => {
     this.props.onSearchNews(this.state.Search);
@@ -68,58 +82,74 @@ class PHNewsScreen extends Component {
       loading = <ActivityIndicator size={30} color="gray" />;
     }
     else if (!this.props.isLoading) {
-      SearchLoading = 
-      <TouchableOpacity
-      style={{ marginLeft: 10 }}
-      onPress={this._onSearch}>
-      <Icon name="md-search" size={30} color="#313235"/>
-    </TouchableOpacity>
+      SearchLoading =
+        <TouchableOpacity
+          style={{ marginLeft: 10 }}
+          onPress={this._onSearch}>
+          <Icon name="md-search" size={30} color="#313235" />
+        </TouchableOpacity>
     }
+    const showActionButton = this.state.scrollY.interpolate({
+      inputRange: [0, HEADER_SCROLL_DISTANCE],
+      outputRange: [HEADER_MIN_HEIGHT, HEADER_MAX_HEIGHT],
+      extrapolate: 'clamp',
+
+    });
+    const scrollDown = this.state.scrollY.interpolate({
+      inputRange: [0, HEADER_SCROLL_DISTANCE],
+      outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+      extrapolate: 'clamp',
+    });
     return (
-      <View style={{ flex: 1, width: "100%"}}>
-        <Header style={HeaderStyle.style}>
-        <View style={{flexDirection:"row", width:"100%", justifyContent:"space-around", alignItems:"center"}}>
-          <TouchableOpacity
-            onPress={() => this.props.navigation.toggleDrawer()}>
-            <Icon
-              name="md-menu"
-              color={"#fff"}
-              size={30}
-            />
-          </TouchableOpacity>
-          <View style={styles.searchHolder}>
-            <Input
-              onChangeText={(Text) => this.setState({ Search: Text })}
-              value={this.state.Search}
-              placeholder="Search Anything"
-            >
-            </Input>
-           {SearchLoading}
-           {loading}
-          </View>
-          <TouchableOpacity
-            onPress={() => alert('On Progess')}>
-            <Icon
-              name="md-list"
-              color={"#fff"}
-              size={30}
-            />
-          </TouchableOpacity>
-        </View>
-        </Header>
+      <View style={styles.MainContainer}>
+        <Animated.View style={{ height: scrollDown }}>
+          <Header style={HeaderStyle.style}>
+            <View style={{ flexDirection: "row", width: "100%", justifyContent: "space-around", alignItems: "center" }}>
+              <TouchableOpacity
+                onPress={() => this.props.navigation.toggleDrawer()}>
+                <Icon
+                  name="md-menu"
+                  color={"#fff"}
+                  size={30}
+                />
+              </TouchableOpacity>
+              <View style={styles.searchHolder}>
+                <Input
+                  onChangeText={(Text) => this.setState({ Search: Text })}
+                  value={this.state.Search}
+                  placeholder="Search Anything"
+                >
+                </Input>
+                {SearchLoading}
+                {loading}
+              </View>
+              <TouchableOpacity
+                onPress={() => alert('Please be patient :)')}>
+                <Icon
+                  name="md-list"
+                  color={"#fff"}
+                  size={30}
+                />
+              </TouchableOpacity>
+            </View>
+          </Header>
+        </Animated.View>
         <ScrollView
+          ref='ScrollView_Reference'
+          scrollsToTop={this.state.goToTop}
+          scrollEventThrottle={16}
+          onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: this.state.scrollY } } }])}
           refreshControl={
             <RefreshControl
-            refreshing={this.state.refreshing}
-            onRefresh={this._onRefresh}
-          />
+              refreshing={this.state.refreshing}
+              onRefresh={this._onRefresh}
+            />
           }
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ flexGrow: 1 }}>
           <View style={MyStyle.Container}>
             {console.log('pumasok sa return')}
             {this.props.GetNews.map((items, key) => (
-
               <View
                 key={key} style={MyStyle.newsPlaceHolder}>
                 <View style={MyStyle.titleStyle}>
@@ -154,27 +184,36 @@ class PHNewsScreen extends Component {
                 </View>
               </View>
             ))}
-
           </View>
         </ScrollView>
+        <Animated.View style={[ActionButtonStyles.Container, { height: showActionButton }]}>
+          <ActionButton
+            Touch={this._goToTop}
+            name="md-arrow-up"
+            size={30}>
+          </ActionButton>
+        </Animated.View>
       </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
+  MainContainer: {
+    flex: 1,
+    backgroundColor: "transparent"
+  },
   iconHolder: {
     marginTop: 10,
     width: 40
   },
   searchHolder: {
     width: "70%",
-    height: 50,
+    height: 40,
     flexDirection: "row",
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: "#fff",
-
   }
 })
 
